@@ -23,17 +23,19 @@
       <div class="card-footer text-muted">
         <h2>Edit</h2>
         <div class="d-flex justify-content-center">
-          <form class="form-inline">
-            <div class="form-group mx-sm-3 mb-2">
-              <label for="newURL">New URL: </label>
+          <form class="form-inline" action="/urls" method="POST">
+            <div class="form-group mb-2">
+              <label for="longURL">New URL:</label>
               <input
-                type="text"
                 class="form-control"
-                id="newURL"
+                id="longURL"
+                type="text"
+                name="longURL"
                 placeholder="http://"
+                style="width: 300px; margin: 1em"
               />
+              <button type="submit" class="btn btn-primary">Submit</button>
             </div>
-            <button type="submit" class="btn btn-primary mb-2">Submit</button>
           </form>
         </div>
       </div>

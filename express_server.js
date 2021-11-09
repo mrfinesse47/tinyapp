@@ -20,7 +20,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  //console.log(urlDatabase[req.params.shortURL]);
   if (urlDatabase[req.params.shortURL]) {
     res.redirect(`${urlDatabase[req.params.shortURL]}`);
   } else {
@@ -32,9 +31,23 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls/new", (req, res) => {
+  const key = generateRandomString();
+  urlDatabase[key] = req.body.longURL;
+  res.redirect(`/urls/${key}`);
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  //updates the long URL
+  console.log("here");
+
+  console.log(req.body.longURL);
+  //res.redirect(`/urls/${key}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -46,35 +59,19 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  console.log("here");
+  console.log(req.params.shortURL);
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.post("/urls", (req, res) => {
-  // console.log(req.body); // Log the POST request body to the console
-  const key = generateRandomString();
-  urlDatabase[key] = req.body.longURL;
-  //console.log(urlDatabase);
-
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
-  res.redirect(`/urls/${key}`);
-});
-
-app.post("/urls/:shortURL/delete", (req, res) => {
-  // console.log(req.body); // Log the POST request body to the console
-  // const key = generateRandomString();
-  // urlDatabase[key] = req.body.longURL;
-  //console.log(urlDatabase);
-  console.log("here");
-  console.log(req.params.shortURL);
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
-  // res.redirect(`/urls/${key}`);
 });
 
 app.listen(PORT, () => {
