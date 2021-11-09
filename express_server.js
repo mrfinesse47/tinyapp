@@ -1,8 +1,12 @@
 const express = require("express");
-const app = express();
+const bodyParser = require("body-parser");
+const { v4: uuidv4 } = require("uuid"); //used to generate random string for generateRandomString()
+
 const PORT = 8080;
 
+const app = express();
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
@@ -38,6 +42,16 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+const generateRandomString = () => uuidv4().slice(0, 6);
+
+console.log(generateRandomString());
