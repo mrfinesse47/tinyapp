@@ -17,6 +17,12 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  //console.log(urlDatabase[req.params.shortURL]);
+  console.log(`/${urlDatabase[req.params.shortURL]}`);
+  res.redirect(`${urlDatabase[req.params.shortURL]}`);
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -44,11 +50,13 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  // console.log(req.body); // Log the POST request body to the console
+  const key = generateRandomString();
+  urlDatabase[key] = req.body.longURL;
   //console.log(urlDatabase);
 
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${key}`);
 });
 
 app.listen(PORT, () => {
