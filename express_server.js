@@ -42,12 +42,10 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  //updates the long URL
-  console.log("here");
-
+app.post("/urls/:id", (req, res) => {
   console.log(req.body.longURL);
-  //res.redirect(`/urls/${key}`);
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
