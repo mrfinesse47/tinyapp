@@ -19,8 +19,11 @@ app.get("/", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   //console.log(urlDatabase[req.params.shortURL]);
-  console.log(`/${urlDatabase[req.params.shortURL]}`);
-  res.redirect(`${urlDatabase[req.params.shortURL]}`);
+  if (urlDatabase[req.params.shortURL]) {
+    res.redirect(`${urlDatabase[req.params.shortURL]}`);
+  } else {
+    res.status(404).send("404 page not found");
+  }
 });
 
 app.get("/urls/new", (req, res) => {
