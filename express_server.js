@@ -17,18 +17,22 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const users = {
-  "9eca5f": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  "1eavdf": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
+const users = {};
+
+//--------------------------------------------------------------------//
+//  Helper Functions
+//--------------------------------------------------------------------//
+
+const isEmailInUse = (email) => {
+  for (id in users) {
+    if (users[id].email === email) {
+      return true;
+    }
+  }
+  return false;
 };
+
+//--------------------------------------------------------------------//
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -80,7 +84,6 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.params.shortURL);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
@@ -91,22 +94,25 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]], //do we need?
+    //if using header
+    user: users[req.cookies["user_id"]],
   };
   res.render("new_user", templateVars);
 });
 
 app.post("/register", (req, res) => {
-  //   This endpoint should add a new user object to the global users object. The user object should include the user's id, email and password, similar to the example above. To generate a random user ID, use the same function you use to generate random IDs for URLs.
-  // After adding the user, set a user_id cookie containing the user's newly generated ID.
-  // Redirect the user to the /urls page.
-  // Test that the users object is properly being appended to. You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
-  // Also test that the user_id cookie is being set correctly upon redirection. You already did this sort of testing in the Cookies in Express activity. Use the same approach here.
-  console.log(req.body.password);
+  const { email, password } = req.body;
+  if (!(password && email && !isEmailInUse(email))) {
+    //checks to see if the email, and password fields are complete and the email is not in use
+    return res.status(400).send("Bad Request");
+  }
+
+  console.log(password);
+
   const newUser = {
     id: generateRandomString(),
-    email: req.body.email,
-    password: req.body.password,
+    email: email,
+    password: password,
   };
 
   users[newUser.id] = newUser;
