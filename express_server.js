@@ -30,7 +30,8 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
@@ -82,7 +83,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.clearCookie("username");
   res.redirect("/urls");
 });
 
