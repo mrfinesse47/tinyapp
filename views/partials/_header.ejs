@@ -17,6 +17,7 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+      <%if(!username){%>
       <form
         class="form-inline my-2 my-lg-0 ml-auto"
         action="/login"
@@ -33,6 +34,21 @@
           Login
         </button>
       </form>
+      <%}else{%>
+
+      <form
+        class="form-inline my-2 my-lg-0 ml-auto"
+        action="/logout"
+        method="POST"
+      >
+        <label class="mr-3 font-weight-bold text-dark"
+          >Logged in as: <%=username%>!
+        </label>
+        <button class="btn btn-outline-dark my-2 my-sm-0" type="submit">
+          Logout
+        </button>
+      </form>
+      <%}%>
     </div>
   </nav>
 </header>

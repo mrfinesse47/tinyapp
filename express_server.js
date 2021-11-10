@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 const { v4: uuidv4 } = require("uuid"); //used to generate random string for generateRandomString()
 
 const PORT = 8080;
@@ -9,6 +10,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
@@ -38,7 +40,8 @@ app.post("/urls/new", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  console.log(req.cookies["username"]);
   res.render("urls_index", templateVars);
 });
 
@@ -53,6 +56,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"],
   };
   res.render("urls_show", templateVars);
 });
@@ -73,7 +77,11 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log(req.body.username);
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
