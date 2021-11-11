@@ -30,9 +30,7 @@ const urlDatabase = {
   },
 };
 
-const users = {
-  123456: { id: "123456", email: "rex@rex.com", password: "12345" },
-}; // test code
+const users = {}; // test code
 
 // const users = {};
 
@@ -86,17 +84,6 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// const urlDatabase = {
-//   b6UTxQ: {
-//     longURL: "https://www.tsn.ca",
-//     userID: "aJ48lW",
-//   },
-//   i3BoGr: {
-//     longURL: "https://www.google.ca",
-//     userID: "aJ48lW",
-//   },
-// };
-
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   if (urlDatabase[shortURL]) {
@@ -116,7 +103,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls/new", (req, res) => {
-  //working with new structure
   const isLoggedin = req.cookies["user_id"];
   if (!isLoggedin) {
     res.status(401).send("Error: You must be logged in to shorten a URL");
@@ -128,8 +114,6 @@ app.post("/urls/new", (req, res) => {
 
   urlDatabase[key].longURL = req.body.longURL;
   urlDatabase[key].userID = isLoggedin;
-
-  // console.log(urlDatabase);
 
   res.redirect(`/urls/${key}`);
 });
@@ -151,26 +135,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls/:id", (req, res) => {
-  //console.log(req.body.longURL);
-  urlDatabase[req.params.id] = req.body.longURL;
+app.post("/urls/:shortURL", (req, res) => {
+  const { shortURL } = req.params;
+
+  urlDatabase[shortURL].longURL = req.body.longURL;
+  // console.log(urlDatabase);
   res.redirect("/urls");
 });
 
-// const urlDatabase = {
-//   b6UTxQ: {
-//     longURL: "https://www.tsn.ca",
-//     userID: "aJ48lW",
-//   },
-//   i3BoGr: {
-//     longURL: "https://www.google.ca",
-//     userID: "aJ48lW",
-//   },
-// };
-
 app.get("/urls/:shortURL", (req, res) => {
-  //to edit
-  // console.log(urlDatabase);
   const { shortURL } = req.params;
 
   if (!urlDatabase[shortURL]) {
@@ -188,13 +161,17 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   //to edit
-  delete urlDatabase[req.params.shortURL];
+  //need to make sure that the user is logged in to do this
+  const { shortURL } = req.params;
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+//-------------------------------------------------------------------//
 
 app.get("/register", (req, res) => {
   const userID = req.cookies["user_id"];
@@ -225,6 +202,8 @@ app.post("/register", (req, res) => {
   users[newUser.id] = newUser;
 
   res.cookie("user_id", newUser.id);
+
+  console.log(newUser.id);
 
   res.redirect("/urls");
 });
