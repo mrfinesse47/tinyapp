@@ -60,7 +60,7 @@ app.get("/u/:shortURL", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls/new", (req, res) => {
-  const isLoggedin = req.cookies["user_id"];
+  const isLoggedin = req.cookies["user_id"]; //could be done better
   if (!isLoggedin) {
     return res.redirect("/login");
   }
@@ -80,7 +80,7 @@ app.post("/urls/new", (req, res) => {
 
   urlDatabase[key] = {}; //initilize new object within url database
 
-  urlDatabase[key].longURL = req.body.longURL;
+  urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
   urlDatabase[key].userID = isLoggedin;
 
   res.redirect(`/urls/${key}`);
@@ -97,10 +97,10 @@ app.get("/urls", (req, res) => {
     return res.redirect("/login");
   }
 
-  const UserURLs = getUserURLs(userID);
+  const userURLs = getUserURLs(userID);
 
   const templateVars = {
-    urls: UserURLs,
+    urls: userURLs,
     user: users[userID],
   };
 
@@ -137,7 +137,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
-    user: cookieUserID,
+    user: users[cookieUserID],
   };
   res.render("urls_show", templateVars);
 });
@@ -164,7 +164,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const { shortURL } = req.params;
   const cookieUserID = req.cookies["user_id"];
   if (!urlDatabase[shortURL]) {
-    return res.status(403).send("You do not have permission to delete this!");
+    return res.status(404).send("This Record doesn't exist, cannot Delete");
   }
   const databaseUserID = urlDatabase[shortURL].userID;
 
@@ -240,8 +240,6 @@ app.post("/login", (req, res) => {
   if (!userID) {
     return res.status(403).send("error: username or password incorrect");
   }
-
-  //"error: username or password incorrect"
 
   if (!checkUserPassword(password, email)) {
     return res.status(403).send("error: username or password incorrect");
