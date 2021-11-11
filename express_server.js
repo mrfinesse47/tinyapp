@@ -140,7 +140,6 @@ app.post("/urls/:shortURL", (req, res) => {
 
   urlDatabase[shortURL].longURL = req.body.longURL;
   // console.log(urlDatabase);
-  res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -154,7 +153,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
   if (urlDatabase[shortURL].userID !== userID) {
     //guards against accessing someone elses' :shortURL will redirect back to "/urls"
-    res.redirect("/urls");
+    res.status(401).send("Error: you cannot access others short URLs to edit");
   }
 
   const templateVars = {
@@ -181,7 +180,8 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/register", (req, res) => {
   const userID = req.cookies["user_id"];
-  if (userID) {
+  if (users[userID]) {
+    //may not want this?? acts funny when i restart server?? so if i restart server i guess i clear cookies??
     //user already logged in
     res.redirect("/urls");
   }
@@ -214,7 +214,7 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const userID = req.cookies["user_id"];
-  if (userID) {
+  if (users[userID]) {
     //user already logged in
     res.redirect("/urls");
   }
