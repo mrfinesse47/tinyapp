@@ -73,28 +73,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls/new", (req, res) => {
-  const cookieUserID = req.cookies["user_id"];
-  if (!cookieUserID || !users[cookieUserID]) {
-    return res
-      .status(401)
-      .send("Error: You must be logged in to shorten a URL");
-  }
-
-  const longURL = req.body.longURL;
-  // const userID = req.cookies["user_id"];
-
-  const newURL = { longURL, userID: cookieUserID };
-
-  const key = generateRandomString();
-  urlDatabase[key] = newURL; //initilize new object within url database
-
-  // urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
-  // urlDatabase[key].userID = isLoggedin;
-
-  res.redirect(`/urls/${key}`);
-});
-
 //-------------------------------------------------------------------
 //  /urls route
 //-------------------------------------------------------------------
@@ -115,6 +93,28 @@ app.get("/urls", (req, res) => {
   };
 
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  const cookieUserID = req.cookies["user_id"];
+  if (!cookieUserID || !users[cookieUserID]) {
+    return res
+      .status(401)
+      .send("Error: You must be logged in to shorten a URL");
+  }
+
+  const longURL = req.body.longURL;
+  // const userID = req.cookies["user_id"];
+
+  const newURL = { longURL, userID: cookieUserID };
+
+  const key = generateRandomString();
+  urlDatabase[key] = newURL; //initilize new object within url database
+
+  // urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
+  // urlDatabase[key].userID = isLoggedin;
+
+  res.redirect(`/urls/${key}`);
 });
 
 //-------------------------------------------------------------------
