@@ -86,9 +86,21 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// const urlDatabase = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW",
+//   },
+//   i3BoGr: {
+//     longURL: "https://www.google.ca",
+//     userID: "aJ48lW",
+//   },
+// };
+
 app.get("/u/:shortURL", (req, res) => {
-  if (urlDatabase[req.params.shortURL]) {
-    res.redirect(`${urlDatabase[req.params.shortURL]}`);
+  const { shortURL } = req.params;
+  if (urlDatabase[shortURL]) {
+    res.redirect(`${urlDatabase[shortURL].longURL}`);
   } else {
     res.status(404).send("404 page not found");
   }
@@ -104,6 +116,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls/new", (req, res) => {
+  //working with new structure
   const isLoggedin = req.cookies["user_id"];
   if (!isLoggedin) {
     res.status(401).send("Error: You must be logged in to shorten a URL");
@@ -144,17 +157,37 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+// const urlDatabase = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW",
+//   },
+//   i3BoGr: {
+//     longURL: "https://www.google.ca",
+//     userID: "aJ48lW",
+//   },
+// };
+
 app.get("/urls/:shortURL", (req, res) => {
+  //to edit
   // console.log(urlDatabase);
+  const { shortURL } = req.params;
+
+  if (!urlDatabase[shortURL]) {
+    //if they requested a non existant short url redirect to urls
+    res.redirect("/urls");
+  }
+
   const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    shortURL: shortURL,
+    longURL: urlDatabase[shortURL].longURL,
     user: users[req.cookies["user_id"]],
   };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  //to edit
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
