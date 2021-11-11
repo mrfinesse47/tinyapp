@@ -30,7 +30,9 @@ const urlDatabase = {
   },
 };
 
-const users = {}; // test code
+const users = {
+  123456: { id: "123456", email: "theif@theif.com", password: "123456" },
+}; // test code
 
 // const users = {};
 
@@ -65,6 +67,7 @@ const checkUserPassword = (password, email) => {
 };
 
 const getUserURLs = (userID) => {
+  //similar to the requested urlsForUser function
   const userDB = {};
   for (key in urlDatabase) {
     if (urlDatabase[key].userID === userID) {
@@ -135,13 +138,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls/:shortURL", (req, res) => {
-  const { shortURL } = req.params;
-
-  urlDatabase[shortURL].longURL = req.body.longURL;
-  // console.log(urlDatabase);
-});
-
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   const userID = req.cookies["user_id"];
@@ -164,11 +160,31 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  //to edit
-  //need to make sure that the user is logged in to do this
+app.post("/urls/:shortURL", (req, res) => {
+  const userID = req.cookies["user_id"];
   const { shortURL } = req.params;
+
+  if (urlDatabase[shortURL].userID !== userID) {
+    //makes sure things can only be modified by the owner
+    return res.status(401).send("You do not have permission to modify this!");
+  }
+
+  urlDatabase[shortURL].longURL = req.body.longURL;
+  res.redirect("/urls");
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const userID = req.cookies["user_id"];
+
+  const { shortURL } = req.params;
+
+  if (urlDatabase[shortURL].userID !== userID) {
+    //makes sure things can only be deleted by the owner
+    return res.status(401).send("You do not have permission to delete this!");
+  }
+
   delete urlDatabase[shortURL];
+
   res.redirect("/urls");
 });
 
