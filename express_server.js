@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
-const cookieParser = require("cookie-parser");
+//const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 
 const PORT = 8080;
@@ -12,7 +12,7 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-app.use(cookieParser());
+//app.use(cookieParser());
 
 app.use(
   cookieSession({
@@ -35,8 +35,8 @@ const urlDatabase = {
 const users = {
   123456: {
     id: "123456",
-    email: "thief@thief.com",
-    password: "$2a$10$uFE.G7b/sxPVuoUCvXDNhOh4wtJi7CatptjsFn7UqSSakg0hry.cC", //same as 123456
+    email: "theif@theif.com",
+    password: "$2a$10$IU1LWpfPcoCAWirP6r4ypu9hVinpLWdseVfkY5buwEEfJaqvJUcbO", //same as 123456
   },
 }; // test code
 
@@ -86,7 +86,6 @@ app.get("/urls/new", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls", (req, res) => {
-  // const userID = req.cookies["user_id"]; //not secure
   const userID = req.session.user_id;
 
   if (!userID || !users[userID]) {
@@ -113,7 +112,6 @@ app.post("/urls", (req, res) => {
   }
 
   const longURL = req.body.longURL;
-  // const userID = req.cookies["user_id"];
 
   const newURL = { longURL, userID: cookieUserID };
 
@@ -205,7 +203,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //-------------------------------------------------------------------//
 
 app.get("/register", (req, res) => {
-  // const userID = req.cookies["user_id"];
   const userID = req.session.user_id;
   if (users[userID]) {
     //user already logged in
@@ -256,7 +253,6 @@ app.post("/register", (req, res) => {
 //-------------------------------------------------------------------//
 
 app.get("/login", (req, res) => {
-  //const userID = req.cookies["user_id"];
   const userID = req.session.user_id;
   if (users[userID]) {
     //user already logged in
@@ -285,14 +281,13 @@ app.post("/login", (req, res) => {
     if (!result) {
       return res.status(403).send("error: username or password incorrect");
     }
-    // res.cookie("user_id", userID);
     req.session.user_id = userID;
     return res.redirect("/urls");
   });
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null; //deletes user cookies
   res.redirect("/urls");
 });
 
