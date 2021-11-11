@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 
 const PORT = 8080;
 
@@ -12,6 +13,13 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
+
+app.use(
+  cookieSession({
+    name: "user_id",
+    keys: ["key1", "key2"],
+  })
+);
 
 const urlDatabase = {
   b6UTxQ: {
@@ -65,7 +73,7 @@ app.get("/u/:shortURL", (req, res) => {
 //if server restarts it still accepts requests
 
 app.get("/urls/new", (req, res) => {
-  const cookieUserID = req.cookies["user_id"]; //isnt secure
+  const cookieUserID = req.session.user_id; //isnt secure
   if (!cookieUserID || !users[cookieUserID]) {
     return res.redirect("/login");
   }
@@ -78,7 +86,8 @@ app.get("/urls/new", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"]; //not secure
+  // const userID = req.cookies["user_id"]; //not secure
+  const userID = req.session.user_id;
 
   if (!userID || !users[userID]) {
     //you dont have permission to view the urls
@@ -96,7 +105,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const cookieUserID = req.cookies["user_id"];
+  const cookieUserID = req.session.user_id;
   if (!cookieUserID || !users[cookieUserID]) {
     return res
       .status(401)
@@ -123,7 +132,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const cookieUserID = req.cookies["user_id"];
+  const cookieUserID = req.session.user_id;
 
   if (!cookieUserID) {
     //if you have no cookie, redirect to log in
@@ -156,7 +165,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const cookieUserID = req.cookies["user_id"];
+  const cookieUserID = req.session.user_id;
   if (!urlDatabase[shortURL]) {
     return res.status(403).send("You do not have permission to modify this!");
   }
@@ -173,7 +182,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const { shortURL } = req.params;
-  const cookieUserID = req.cookies["user_id"];
+  const cookieUserID = req.session.user_id;
   if (!urlDatabase[shortURL]) {
     return res.status(404).send("This Record doesn't exist, cannot Delete");
   }
@@ -196,7 +205,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //-------------------------------------------------------------------//
 
 app.get("/register", (req, res) => {
-  const userID = req.cookies["user_id"];
+  // const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   if (users[userID]) {
     //user already logged in
     return res.redirect("/urls");
@@ -234,7 +244,8 @@ app.post("/register", (req, res) => {
 
     console.log(users);
 
-    res.cookie("user_id", newUser.id);
+    //res.cookie("user_id", newUser.id);
+    req.session.user_id = newUser.id;
 
     res.redirect("/urls");
   });
@@ -245,7 +256,8 @@ app.post("/register", (req, res) => {
 //-------------------------------------------------------------------//
 
 app.get("/login", (req, res) => {
-  const userID = req.cookies["user_id"];
+  //const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   if (users[userID]) {
     //user already logged in
     return res.redirect("/urls");
@@ -273,7 +285,8 @@ app.post("/login", (req, res) => {
     if (!result) {
       return res.status(403).send("error: username or password incorrect");
     }
-    res.cookie("user_id", userID);
+    // res.cookie("user_id", userID);
+    req.session.user_id = userID;
     return res.redirect("/urls");
   });
 });
