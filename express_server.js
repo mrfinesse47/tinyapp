@@ -70,11 +70,19 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const isLoggedin = req.cookies["user_id"];
+  if (!isLoggedin) {
+    res.redirect("/login");
+  }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
+  const isLoggedin = req.cookies["user_id"];
+  if (!isLoggedin) {
+    res.status(401).send("Error: You must be logged in to shorten a URL");
+  }
   const key = generateRandomString();
   urlDatabase[key] = req.body.longURL;
   res.redirect(`/urls/${key}`);
