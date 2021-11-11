@@ -25,7 +25,11 @@ const urlDatabase = {
 };
 
 const users = {
-  123456: { id: "123456", email: "thief@thief.com", password: "123456" },
+  123456: {
+    id: "123456",
+    email: "thief@thief.com",
+    password: "$2a$10$uFE.G7b/sxPVuoUCvXDNhOh4wtJi7CatptjsFn7UqSSakg0hry.cC", //same as 123456
+  },
 }; // test code
 
 const helperClosure = require("./helpers");
@@ -214,21 +218,29 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Bad Request");
   }
 
-  const hashedPassword = bcrypt.hashSync(password, 10); //hashes the password synchronously
+  //const hashedPassword = bcrypt.hashSync(password, 10); //hashes the password synchronously
 
-  const newUser = {
-    id: generateRandomString(),
-    email,
-    password: hashedPassword,
-  };
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    //using 10 rounds of salt
 
-  users[newUser.id] = newUser; //add the new user to the existing users database
+    if (err) {
+      return res.status(500).send("Error: Internal server error.");
+    }
 
-  console.log(users);
+    const newUser = {
+      id: generateRandomString(),
+      email,
+      password: hashedPassword,
+    };
 
-  res.cookie("user_id", newUser.id);
+    users[newUser.id] = newUser; //add the new user to the existing users database
 
-  res.redirect("/urls");
+    console.log(users);
+
+    res.cookie("user_id", newUser.id);
+
+    res.redirect("/urls");
+  });
 });
 
 //-------------------------------------------------------------------//
@@ -248,8 +260,6 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  // bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); // returns true
-  // bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); // returns false
   const { email, password } = req.body;
   const userID = findUserIDbyEmail(email);
 
