@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require("uuid"); //used to generate random string for generateRandomString()
+
 const helperClosure = (urlDatabase, users) => {
   const findUserIDbyEmail = (email) => {
     for (id in users) {
@@ -30,7 +32,14 @@ const helperClosure = (urlDatabase, users) => {
     return userDB;
   };
 
-  return { findUserIDbyEmail, checkUserPassword, getUserURLs };
+  const generateRandomString = () => uuidv4().slice(0, 6);
+
+  return {
+    findUserIDbyEmail,
+    checkUserPassword,
+    getUserURLs,
+    generateRandomString,
+  };
 };
 
 module.exports = helperClosure;

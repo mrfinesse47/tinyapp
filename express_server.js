@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
-const { v4: uuidv4 } = require("uuid"); //used to generate random string for generateRandomString()
 
 const PORT = 8080;
 
@@ -28,14 +27,20 @@ const users = {
 }; // test code
 
 const helperClosure = require("./helpers");
-const { findUserIDbyEmail, checkUserPassword, getUserURLs } = helperClosure(
-  urlDatabase,
-  users
-);
+const {
+  findUserIDbyEmail,
+  checkUserPassword,
+  getUserURLs,
+  generateRandomString,
+} = helperClosure(urlDatabase, users);
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
+//-------------------------------------------------------------------
+//  /u/:shortURL route
+//-------------------------------------------------------------------
 
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
@@ -45,6 +50,10 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404).send("404 page not found");
   }
 });
+
+//-------------------------------------------------------------------
+//  /urls/new routes
+//-------------------------------------------------------------------
 
 app.get("/urls/new", (req, res) => {
   const isLoggedin = req.cookies["user_id"];
@@ -71,6 +80,10 @@ app.post("/urls/new", (req, res) => {
   res.redirect(`/urls/${key}`);
 });
 
+//-------------------------------------------------------------------
+//  /urls route
+//-------------------------------------------------------------------
+
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
 
@@ -87,6 +100,10 @@ app.get("/urls", (req, res) => {
 
   res.render("urls_index", templateVars);
 });
+
+//-------------------------------------------------------------------
+//  /urls/:shortURL routes
+//-------------------------------------------------------------------
 
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
@@ -138,10 +155,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+//-------------------------------------------------------------------//
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//-------------------------------------------------------------------//
+// Registration  Routes
 //-------------------------------------------------------------------//
 
 app.get("/register", (req, res) => {
@@ -178,6 +199,10 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+//-------------------------------------------------------------------//
+// Login/Logout  Routes
+//-------------------------------------------------------------------//
+
 app.get("/login", (req, res) => {
   const userID = req.cookies["user_id"];
   if (users[userID]) {
@@ -206,19 +231,15 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
+//-------------------------------------------------------------------//
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-const generateRandomString = () => uuidv4().slice(0, 6);
 
 //console.log(generateRandomString());
