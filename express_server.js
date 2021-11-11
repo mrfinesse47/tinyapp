@@ -12,13 +12,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
-//old structure
-// const urlDatabase = {
-//   b2xVn2: "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com",
-// };
-
-//new structure
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -34,54 +27,11 @@ const users = {
   123456: { id: "123456", email: "theif@theif.com", password: "123456" },
 }; // test code
 
-// const users = {};
-
-// newUser = {
-//   id: generateRandomString(),
-//   email: email,
-//   password: password,
-// };
-
-//--------------------------------------------------------------------//
-//  Helper Functions
-//--------------------------------------------------------------------//
-
-const findUserIDbyEmail = (email) => {
-  for (id in users) {
-    if (users[id].email === email) {
-      return id;
-    }
-  }
-  return false;
-};
-
-const checkUserPassword = (password, email) => {
-  const id = findUserIDbyEmail(email);
-  if (!id) {
-    return false;
-  }
-  if (users[id].password === password) {
-    return id;
-  }
-  return false;
-};
-
-const getUserURLs = (userID) => {
-  //similar to the requested urlsForUser function
-  const userDB = {};
-  for (key in urlDatabase) {
-    if (urlDatabase[key].userID === userID) {
-      userDB[key] = urlDatabase[key].longURL;
-    }
-  }
-  return userDB;
-};
-
-console.log(getUserURLs("aJ48lW"));
-
-//console.log(checkUserPassword("12345", "user@user.com"));
-
-//--------------------------------------------------------------------//
+const helperClosure = require("./helpers");
+const { findUserIDbyEmail, checkUserPassword, getUserURLs } = helperClosure(
+  urlDatabase,
+  users
+);
 
 app.get("/", (req, res) => {
   res.send("Hello!");
