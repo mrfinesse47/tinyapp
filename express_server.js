@@ -53,7 +53,7 @@ const checkUserPassword = (password, email) => {
   return false;
 };
 
-console.log(checkUserPassword("12345", "user@user.com"));
+//console.log(checkUserPassword("12345", "user@user.com"));
 
 //--------------------------------------------------------------------//
 
@@ -116,16 +116,20 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (userID) {
+    //user already logged in
+    res.redirect("/urls");
+  }
   const templateVars = {
-    //if using header
-    user: users[req.cookies["user_id"]],
+    user: null, //have to send a user object every header render
   };
   res.render("new_user", templateVars);
 });
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const userID = findUserIDbyEmail(email);
+  const userID = findUserIDbyEmail(email); //returns false if not found
   if (!(password && email && !userID)) {
     //checks to see if the email, and password fields are complete and the email is not in use
     return res.status(400).send("Bad Request");
@@ -142,13 +146,16 @@ app.post("/register", (req, res) => {
   res.cookie("user_id", newUser.id);
 
   res.redirect("/urls");
-
-  // /res.render("new_user", templateVars);
 });
 
 app.get("/login", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (userID) {
+    //user already logged in
+    res.redirect("/urls");
+  }
   const templateVars = {
-    user: users[req.cookies["user_id"]],
+    user: null, //have to send to a user object to render a header
   };
   res.render("login_user", templateVars);
 });
