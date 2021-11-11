@@ -59,29 +59,35 @@ app.get("/u/:shortURL", (req, res) => {
 //  /urls/new routes
 //-------------------------------------------------------------------
 
+//if server restarts it still accepts requests
+
 app.get("/urls/new", (req, res) => {
-  const isLoggedin = req.cookies["user_id"]; //could be done better
-  if (!isLoggedin) {
+  const cookieUserID = req.cookies["user_id"]; //isnt secure
+  if (!cookieUserID || !users[cookieUserID]) {
     return res.redirect("/login");
   }
-  const templateVars = { user: users[req.cookies["user_id"]] };
+  const templateVars = { user: users[cookieUserID] };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls/new", (req, res) => {
-  const isLoggedin = req.cookies["user_id"];
-  if (!isLoggedin) {
+  const cookieUserID = req.cookies["user_id"];
+  if (!cookieUserID || !users[cookieUserID]) {
     return res
       .status(401)
       .send("Error: You must be logged in to shorten a URL");
   }
 
+  const longURL = req.body.longURL;
+  // const userID = req.cookies["user_id"];
+
+  const newURL = { longURL, userID: cookieUserID };
+
   const key = generateRandomString();
+  urlDatabase[key] = newURL; //initilize new object within url database
 
-  urlDatabase[key] = {}; //initilize new object within url database
-
-  urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
-  urlDatabase[key].userID = isLoggedin;
+  // urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
+  // urlDatabase[key].userID = isLoggedin;
 
   res.redirect(`/urls/${key}`);
 });
@@ -91,9 +97,10 @@ app.post("/urls/new", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.cookies["user_id"]; //not secure
 
-  if (!userID) {
+  if (!userID || !users[userID]) {
+    //you dont have permission to view the urls
     return res.redirect("/login");
   }
 
@@ -126,6 +133,8 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   const databaseUserID = urlDatabase[shortURL].userID;
+
+  console.log(urlDatabase);
 
   if (databaseUserID !== cookieUserID) {
     //guards against accessing someone elses' :shortURL will redirect back to "/urls"
