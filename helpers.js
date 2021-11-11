@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require("uuid"); //used to generate random string for gen
 
 const helperClosure = (urlDatabase, users) => {
   const findUserIDbyEmail = (email) => {
-    for (id in users) {
+    for (const id in users) {
       if (users[id].email === email) {
         return id;
       }
@@ -24,7 +24,7 @@ const helperClosure = (urlDatabase, users) => {
   const getUserURLs = (userID) => {
     //similar to the requested urlsForUser function
     const userDB = {};
-    for (key in urlDatabase) {
+    for (const key in urlDatabase) {
       if (urlDatabase[key].userID === userID) {
         userDB[key] = urlDatabase[key].longURL;
       }

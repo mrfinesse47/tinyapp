@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const PORT = 8080;
 
 const app = express();
+
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -23,7 +24,7 @@ const urlDatabase = {
 };
 
 const users = {
-  123456: { id: "123456", email: "theif@theif.com", password: "123456" },
+  123456: { id: "123456", email: "thief@thief.com", password: "123456" },
 }; // test code
 
 const helperClosure = require("./helpers");
@@ -34,8 +35,12 @@ const {
   generateRandomString,
 } = helperClosure(urlDatabase, users);
 
+//-------------------------------------------------------------------
+//  / route
+//-------------------------------------------------------------------
+
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 //-------------------------------------------------------------------
@@ -45,10 +50,9 @@ app.get("/", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
   if (urlDatabase[shortURL]) {
-    res.redirect(`${urlDatabase[shortURL].longURL}`);
-  } else {
-    res.status(404).send("404 page not found");
+    return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
+  res.status(404).send("404 page not found");
 });
 
 //-------------------------------------------------------------------
@@ -58,7 +62,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const isLoggedin = req.cookies["user_id"];
   if (!isLoggedin) {
-    res.redirect("/login");
+    return res.redirect("/login");
   }
   const templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
@@ -67,7 +71,9 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls/new", (req, res) => {
   const isLoggedin = req.cookies["user_id"];
   if (!isLoggedin) {
-    res.status(401).send("Error: You must be logged in to shorten a URL");
+    return res
+      .status(401)
+      .send("Error: You must be logged in to shorten a URL");
   }
 
   const key = generateRandomString();
@@ -88,7 +94,7 @@ app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
 
   if (!userID) {
-    res.redirect("/login");
+    return res.redirect("/login");
   }
 
   const UserURLs = getUserURLs(userID);
@@ -107,33 +113,47 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  const userID = req.cookies["user_id"];
+  const cookieUserID = req.cookies["user_id"];
+
+  if (!cookieUserID) {
+    //if you have no cookie, redirect to log in
+    return res.redirect("/login");
+  }
 
   if (!urlDatabase[shortURL]) {
     //if they requested a non existant short url redirect to urls
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
 
-  if (urlDatabase[shortURL].userID !== userID) {
+  const databaseUserID = urlDatabase[shortURL].userID;
+
+  if (databaseUserID !== cookieUserID) {
     //guards against accessing someone elses' :shortURL will redirect back to "/urls"
-    res.status(401).send("Error: you cannot access others short URLs to edit");
+    return res
+      .status(403)
+      .send("Error: you cannot access others short URLs to edit");
   }
 
   const templateVars = {
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
-    user: users[userID],
+    user: cookieUserID,
   };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const userID = req.cookies["user_id"];
   const { shortURL } = req.params;
+  const cookieUserID = req.cookies["user_id"];
+  if (!urlDatabase[shortURL]) {
+    return res.status(403).send("You do not have permission to modify this!");
+  }
+  const databaseUserID = urlDatabase[shortURL].userID;
 
-  if (urlDatabase[shortURL].userID !== userID) {
+  if (databaseUserID !== cookieUserID) {
+    //if the database userid differs from the cookie user id
     //makes sure things can only be modified by the owner
-    return res.status(401).send("You do not have permission to modify this!");
+    return res.status(403).send("You do not have permission to modify this!");
   }
 
   urlDatabase[shortURL].longURL = req.body.longURL;
@@ -141,13 +161,16 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userID = req.cookies["user_id"];
-
   const { shortURL } = req.params;
+  const cookieUserID = req.cookies["user_id"];
+  if (!urlDatabase[shortURL]) {
+    return res.status(403).send("You do not have permission to delete this!");
+  }
+  const databaseUserID = urlDatabase[shortURL].userID;
 
-  if (urlDatabase[shortURL].userID !== userID) {
+  if (databaseUserID !== cookieUserID) {
     //makes sure things can only be deleted by the owner
-    return res.status(401).send("You do not have permission to delete this!");
+    return res.status(403).send("You do not have permission to delete this!");
   }
 
   delete urlDatabase[shortURL];
@@ -157,10 +180,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //-------------------------------------------------------------------//
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 //-------------------------------------------------------------------//
 // Registration  Routes
 //-------------------------------------------------------------------//
@@ -168,9 +187,8 @@ app.get("/urls.json", (req, res) => {
 app.get("/register", (req, res) => {
   const userID = req.cookies["user_id"];
   if (users[userID]) {
-    //may not want this?? acts funny when i restart server?? so if i restart server i guess i clear cookies??
     //user already logged in
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
   const templateVars = {
     user: null, //have to send a user object every header render
@@ -180,9 +198,9 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const userID = findUserIDbyEmail(email); //returns false if not found
+  const userID = findUserIDbyEmail(email); //returns false if not found, returns the user ID if found
   if (!(password && email && !userID)) {
-    //checks to see if the email, and password fields are complete and the email is not in use
+    //checks to see if the email, and password fields are complete, and the email is not in use
     return res.status(400).send("Bad Request");
   }
 
@@ -192,7 +210,7 @@ app.post("/register", (req, res) => {
     password: password,
   };
 
-  users[newUser.id] = newUser;
+  users[newUser.id] = newUser; //add the new user to the existing users database
 
   res.cookie("user_id", newUser.id);
 
@@ -207,7 +225,7 @@ app.get("/login", (req, res) => {
   const userID = req.cookies["user_id"];
   if (users[userID]) {
     //user already logged in
-    res.redirect("/urls");
+    return res.redirect("/urls");
   }
   const templateVars = {
     user: null, //have to send to a user object to render a header
@@ -223,9 +241,13 @@ app.post("/login", (req, res) => {
     return res.status(403).send("error: username or password incorrect");
   }
 
+  //"error: username or password incorrect"
+
   if (!checkUserPassword(password, email)) {
     return res.status(403).send("error: username or password incorrect");
   }
+
+  //set the cookie on login success
 
   res.cookie("user_id", userID);
   res.redirect("/urls");
@@ -242,4 +264,8 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//console.log(generateRandomString());
+//how bout lets not dump the entire database
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
