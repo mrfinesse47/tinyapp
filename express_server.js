@@ -33,12 +33,10 @@ const users = {
 }; // test code
 
 const helperClosure = require("./helpers");
-const {
-  findUserIDbyEmail,
-  checkUserPassword,
-  getUserURLs,
-  generateRandomString,
-} = helperClosure(urlDatabase, users);
+const { findUserIDbyEmail, getUserURLs, generateRandomString } = helperClosure(
+  urlDatabase,
+  users
+);
 
 //-------------------------------------------------------------------
 //  / route
@@ -267,14 +265,18 @@ app.post("/login", (req, res) => {
     return res.status(403).send("error: username or password incorrect");
   }
 
-  if (!checkUserPassword(password, email)) {
-    return res.status(403).send("error: username or password incorrect");
-  }
+  const userHashedPassword = users[userID].password;
 
-  //set the cookie on login success
-
-  res.cookie("user_id", userID);
-  res.redirect("/urls");
+  bcrypt.compare(password, userHashedPassword, function (err, result) {
+    if (err) {
+      return res.status(500).send("Error: Internal server error.");
+    }
+    if (!result) {
+      return res.status(403).send("error: username or password incorrect");
+    }
+    res.cookie("user_id", userID);
+    return res.redirect("/urls");
+  });
 });
 
 app.post("/logout", (req, res) => {

@@ -11,17 +11,6 @@ const helperClosure = (urlDatabase, users) => {
     return false;
   };
 
-  const checkUserPassword = (password, email) => {
-    const id = findUserIDbyEmail(email);
-    if (!id) {
-      return false;
-    }
-    if (bcrypt.compareSync(password, users[id].password)) {
-      return id;
-    }
-    return false;
-  };
-
   const getUserURLs = (userID) => {
     //similar to the requested urlsForUser function
     const userDB = {};
@@ -37,7 +26,6 @@ const helperClosure = (urlDatabase, users) => {
 
   return {
     findUserIDbyEmail,
-    checkUserPassword,
     getUserURLs,
     generateRandomString,
   };
