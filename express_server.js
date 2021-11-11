@@ -163,8 +163,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const databaseUserID = urlDatabase[shortURL].userID;
 
   if (databaseUserID !== cookieUserID) {
-    //if the database userid differs from the cookie user id
-    //makes sure things can only be modified by the owner
+    //makes sure urls can only be modified by the owner
     return res.status(403).send("You do not have permission to modify this!");
   }
 
@@ -181,7 +180,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const databaseUserID = urlDatabase[shortURL].userID;
 
   if (databaseUserID !== cookieUserID) {
-    //makes sure things can only be deleted by the owner
+    //makes sure urls can only be deleted by the owner
     return res.status(403).send("You do not have permission to delete this!");
   }
 
