@@ -145,16 +145,22 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const { shortURL } = req.params;
+  const userID = req.cookies["user_id"];
 
   if (!urlDatabase[shortURL]) {
     //if they requested a non existant short url redirect to urls
     res.redirect("/urls");
   }
 
+  if (urlDatabase[shortURL].userID !== userID) {
+    //guards against accessing someone elses' :shortURL will redirect back to "/urls"
+    res.redirect("/urls");
+  }
+
   const templateVars = {
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
-    user: users[req.cookies["user_id"]],
+    user: users[userID],
   };
   res.render("urls_show", templateVars);
 });
@@ -202,8 +208,6 @@ app.post("/register", (req, res) => {
   users[newUser.id] = newUser;
 
   res.cookie("user_id", newUser.id);
-
-  console.log(newUser.id);
 
   res.redirect("/urls");
 });
