@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 
@@ -213,13 +214,17 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Bad Request");
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10); //hashes the password synchronously
+
   const newUser = {
     id: generateRandomString(),
-    email: email,
-    password: password,
+    email,
+    password: hashedPassword,
   };
 
   users[newUser.id] = newUser; //add the new user to the existing users database
+
+  console.log(users);
 
   res.cookie("user_id", newUser.id);
 
@@ -243,6 +248,8 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  // bcrypt.compareSync("purple-monkey-dinosaur", hashedPassword); // returns true
+  // bcrypt.compareSync("pink-donkey-minotaur", hashedPassword); // returns false
   const { email, password } = req.body;
   const userID = findUserIDbyEmail(email);
 

@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid"); //used to generate random string for generateRandomString()
+const bcrypt = require("bcryptjs");
 
 const helperClosure = (urlDatabase, users) => {
   const findUserIDbyEmail = (email) => {
@@ -15,7 +16,7 @@ const helperClosure = (urlDatabase, users) => {
     if (!id) {
       return false;
     }
-    if (users[id].password === password) {
+    if (bcrypt.compareSync(password, users[id].password)) {
       return id;
     }
     return false;
