@@ -12,16 +12,29 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
+//old structure
+// const urlDatabase = {
+//   b2xVn2: "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com",
+// };
+
+//new structure
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
-// const users = {
-//   123456: { id: "123456", email: "user@user.com", password: "12345" },
-// }; // test code
+const users = {
+  123456: { id: "123456", email: "rex@rex.com", password: "12345" },
+}; // test code
 
-const users = {};
+// const users = {};
 
 // newUser = {
 //   id: generateRandomString(),
@@ -53,6 +66,18 @@ const checkUserPassword = (password, email) => {
   return false;
 };
 
+const getUserURLs = (userID) => {
+  const userDB = {};
+  for (key in urlDatabase) {
+    if (urlDatabase[key].userID === userID) {
+      userDB[key] = urlDatabase[key].longURL;
+    }
+  }
+  return userDB;
+};
+
+console.log(getUserURLs("aJ48lW"));
+
 //console.log(checkUserPassword("12345", "user@user.com"));
 
 //--------------------------------------------------------------------//
@@ -83,16 +108,31 @@ app.post("/urls/new", (req, res) => {
   if (!isLoggedin) {
     res.status(401).send("Error: You must be logged in to shorten a URL");
   }
+
   const key = generateRandomString();
-  urlDatabase[key] = req.body.longURL;
+
+  urlDatabase[key] = {}; //initilize new object within url database
+
+  urlDatabase[key].longURL = req.body.longURL;
+  urlDatabase[key].userID = isLoggedin;
+
+  // console.log(urlDatabase);
+
   res.redirect(`/urls/${key}`);
 });
 
 app.get("/urls", (req, res) => {
-  // console.log("user id", req.cookies["user_id"]);
+  const userID = req.cookies["user_id"];
+
+  if (!userID) {
+    res.redirect("/login");
+  }
+
+  const UserURLs = getUserURLs(userID);
+
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]],
+    urls: UserURLs,
+    user: users[userID],
   };
 
   res.render("urls_index", templateVars);
