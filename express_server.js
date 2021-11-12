@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
+const methodOverride = require("method-override");
 
 const PORT = 8080;
 const SALT_CYCLES = 10;
@@ -10,6 +11,7 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 app.use(
   cookieSession({
@@ -108,7 +110,7 @@ app.post("/urls", (req, res) => {
 });
 
 //-------------------------------------------------------------------
-//  /urls/:shortURL routes
+//  /urls/:shortURL routes get,put,and delete
 //-------------------------------------------------------------------
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -148,7 +150,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
+  //used method override module to enable put
   const { shortURL } = req.params;
   const cookieUserID = req.session.user_id;
   if (!urlDatabase[shortURL]) {
@@ -169,7 +172,8 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
+  //used method override module to enable delete
   const { shortURL } = req.params;
   const cookieUserID = req.session.user_id;
   if (!urlDatabase[shortURL]) {

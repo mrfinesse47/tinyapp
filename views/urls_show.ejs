@@ -24,7 +24,11 @@
       <div class="card-footer text-muted">
         <h2>Edit</h2>
         <div class="d-flex justify-content-center">
-          <form class="form-inline" action="/urls/<%=shortURL%>" method="POST">
+          <form
+            class="form-inline"
+            action="/urls/<%=shortURL%>?_method=PUT"
+            method="POST"
+          >
             <div class="form-group mb-2">
               <label for="longURL">New URL:</label>
               <input
