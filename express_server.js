@@ -89,7 +89,11 @@ app.get("/urls", (req, res) => {
 
   if (!userID || !users[userID]) {
     //you dont have permission to view the urls
-    return res.redirect("/login");
+    return res
+      .status(400)
+      .send(
+        'Error: You must be logged in to view long urls. <a href="/login">Login</a>'
+      );
   }
 
   const userURLs = getUserURLs(userID); //returns an object in the form of {shortURL:LongURL,sortURL:LongURL......}
@@ -107,7 +111,9 @@ app.post("/urls", (req, res) => {
   if (!cookieUserID || !users[cookieUserID]) {
     return res
       .status(401)
-      .send("Error: You must be logged in to shorten a URL");
+      .send(
+        'Error: You must be logged in to shorten a URL. <a href="/login">Login</a>'
+      );
   }
 
   const longURL = req.body.longURL;
