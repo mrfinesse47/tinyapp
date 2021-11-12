@@ -1,7 +1,7 @@
 # TinyApp Project
 
 TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs (à la bit.ly).
-Super secure application, REST assured your data will be safe from attacks.
+Super secure application, REST assured your data will be safe from attacks. Now supports PUT and Delete for full RESTful app.
 
 ## Final Product
 
