@@ -29,24 +29,24 @@ const testUsers = {
 
 const { findUserIDbyEmail } = helperClosure(null, testUsers);
 
-describe("findUserIDbyEmail", function () {
-  it("should return a user ID when passed in a valid email", function () {
+describe("findUserIDbyEmail", function() {
+  it("should return a user ID when passed in a valid email", function() {
     const userID = findUserIDbyEmail("user@example.com");
     const expectedUserID = "userRandomID";
 
     assert.equal(userID, expectedUserID);
   });
-  it("should return null when passed in an in-valid email", function () {
+  it("should return null when passed in an in-valid email", function() {
     const userID = findUserIDbyEmail("usfsdfaser@example.com");
 
     assert.isNull(userID);
   });
-  it("should return null when passed in an empty string", function () {
+  it("should return null when passed in an empty string", function() {
     const userID = findUserIDbyEmail("");
 
     assert.isNull(userID);
   });
-  it("should return null when passed in a number", function () {
+  it("should return null when passed in a number", function() {
     const userID = findUserIDbyEmail(23);
 
     assert.isNull(userID);

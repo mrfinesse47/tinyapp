@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
-const morgan = require("morgan");
 const cookieSession = require("cookie-session");
 
 const PORT = 8080;
@@ -11,7 +10,6 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan("dev"));
 
 app.use(
   cookieSession({
@@ -20,24 +18,9 @@ app.use(
   })
 );
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
+const urlDatabase = {};
 
-const users = {
-  123456: {
-    id: "123456",
-    email: "theif@theif.com",
-    password: "$2a$10$IU1LWpfPcoCAWirP6r4ypu9hVinpLWdseVfkY5buwEEfJaqvJUcbO", //same as 123456
-  },
-}; // test code
+const users = {};
 
 const helperClosure = require("./helpers");
 const { findUserIDbyEmail, getUserURLs, generateRandomString } = helperClosure(
@@ -69,10 +52,8 @@ app.get("/u/:shortURL", (req, res) => {
 //  /urls/new routes
 //-------------------------------------------------------------------
 
-//if server restarts it still accepts requests
-
 app.get("/urls/new", (req, res) => {
-  const cookieUserID = req.session.user_id; //isnt secure
+  const cookieUserID = req.session.user_id;
   if (!cookieUserID || !users[cookieUserID]) {
     return res.redirect("/login");
   }
@@ -122,9 +103,6 @@ app.post("/urls", (req, res) => {
 
   const key = generateRandomString();
   urlDatabase[key] = newURL; //initilize new object within url database
-
-  // urlDatabase[key].longURL = req.body.longURL; //maybe i can assign this above instead of an empty object
-  // urlDatabase[key].userID = isLoggedin;
 
   res.redirect(`/urls/${key}`);
 });
@@ -238,7 +216,7 @@ app.post("/register", (req, res) => {
     //if there is no password entered, or there is no email entered, or the user id is already taken.
     return res
       .status(400)
-      .send('Invalid Credentials. <a href="/register">Login</a>');
+      .send('Invalid Credentials. <a href="/register">Register</a>');
   }
 
   bcrypt.hash(password, SALT_CYCLES, (err, hashedPassword) => {
@@ -247,7 +225,7 @@ app.post("/register", (req, res) => {
     if (err) {
       return res
         .status(500)
-        .send('Error: Internal server error. <a href="/register">Login</a>');
+        .send('Error: Internal server error. <a href="/register">Register</a>');
     }
 
     const newUser = {
@@ -322,9 +300,3 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-//how bout lets not dump the entire database
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
