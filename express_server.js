@@ -180,7 +180,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
   if (databaseUserID !== cookieUserID) {
     //makes sure urls can only be modified by the owner
-    return res.status(403).send("You do not have permission to modify this!");
+    return res
+      .status(403)
+      .send(
+        "This is not your link, You do not have permission to modify this!"
+      );
   }
 
   urlDatabase[shortURL].longURL = req.body.longURL;
@@ -197,7 +201,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
   if (databaseUserID !== cookieUserID) {
     //makes sure urls can only be deleted by the owner
-    return res.status(403).send("You do not have permission to delete this!");
+    return res
+      .status(403)
+      .send(
+        'You do not have permission to delete this! <a href="/login">Login</a>'
+      );
   }
 
   delete urlDatabase[shortURL];
@@ -228,14 +236,18 @@ app.post("/register", (req, res) => {
   const userID = findUserIDbyEmail(email); //returns null if not found, returns the user ID if found
   if (!password || !email || userID) {
     //if there is no password entered, or there is no email entered, or the user id is already taken.
-    return res.status(400).send("Invalid Credentials");
+    return res
+      .status(400)
+      .send('Invalid Credentials. <a href="/register">Login</a>');
   }
 
   bcrypt.hash(password, SALT_CYCLES, (err, hashedPassword) => {
     //using 10 rounds of salt
 
     if (err) {
-      return res.status(500).send("Error: Internal server error.");
+      return res
+        .status(500)
+        .send('Error: Internal server error. <a href="/register">Login</a>');
     }
 
     const newUser = {
@@ -273,17 +285,27 @@ app.post("/login", (req, res) => {
   const userID = findUserIDbyEmail(email);
 
   if (!userID) {
-    return res.status(403).send("error: username or password incorrect");
+    return res
+      .status(403)
+      .send(
+        'error: username or password incorrect. <a href="/login">Login</a>'
+      );
   }
 
   const userHashedPassword = users[userID].password;
 
   bcrypt.compare(password, userHashedPassword, (err, result) => {
     if (err) {
-      return res.status(500).send("Error: Internal server error.");
+      return res
+        .status(500)
+        .send('Error: Internal server error. <a href="/login">Login</a>');
     }
     if (!result) {
-      return res.status(403).send("error: username or password incorrect");
+      return res
+        .status(403)
+        .send(
+          'error: username or password incorrect. <a href="/login">Login</a>'
+        );
     }
     req.session.user_id = userID;
     return res.redirect("/urls");
