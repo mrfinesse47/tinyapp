@@ -3,12 +3,13 @@ const bcrypt = require("bcryptjs");
 
 const helperClosure = (urlDatabase, users) => {
   const findUserIDbyEmail = (email) => {
+    //it does take in urlDatabase in the form as a closure
     for (const id in users) {
       if (users[id].email === email) {
         return id;
       }
     }
-    return false;
+    return null;
   };
 
   const getUserURLs = (userID) => {
@@ -19,7 +20,7 @@ const helperClosure = (urlDatabase, users) => {
         userDB[key] = urlDatabase[key].longURL;
       }
     }
-    return userDB;
+    return userDB; //returns an object in the form of {shortURL:LongURL,....sortURL:LongURL}
   };
 
   const generateRandomString = () => uuidv4().slice(0, 6);

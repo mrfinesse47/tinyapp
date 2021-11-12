@@ -2,17 +2,16 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
-//const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 
 const PORT = 8080;
+const SALT_CYCLES = 10;
 
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-//app.use(cookieParser());
 
 app.use(
   cookieSession({
@@ -93,7 +92,7 @@ app.get("/urls", (req, res) => {
     return res.redirect("/login");
   }
 
-  const userURLs = getUserURLs(userID);
+  const userURLs = getUserURLs(userID); //returns an object in the form of {shortURL:LongURL,sortURL:LongURL......}
 
   const templateVars = {
     urls: userURLs,
@@ -216,15 +215,13 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const userID = findUserIDbyEmail(email); //returns false if not found, returns the user ID if found
-  if (!(password && email && !userID)) {
-    //checks to see if the email, and password fields are complete, and the email is not in use
-    return res.status(400).send("Bad Request");
+  const userID = findUserIDbyEmail(email); //returns null if not found, returns the user ID if found
+  if (!password || !email || userID) {
+    //if there is no password entered, or there is no email entered, or the user id is already taken.
+    return res.status(400).send("Invalid Credentials");
   }
 
-  //const hashedPassword = bcrypt.hashSync(password, 10); //hashes the password synchronously
-
-  bcrypt.hash(password, 10, (err, hashedPassword) => {
+  bcrypt.hash(password, SALT_CYCLES, (err, hashedPassword) => {
     //using 10 rounds of salt
 
     if (err) {
@@ -239,9 +236,6 @@ app.post("/register", (req, res) => {
 
     users[newUser.id] = newUser; //add the new user to the existing users database
 
-    console.log(users);
-
-    //res.cookie("user_id", newUser.id);
     req.session.user_id = newUser.id;
 
     res.redirect("/urls");
@@ -274,7 +268,7 @@ app.post("/login", (req, res) => {
 
   const userHashedPassword = users[userID].password;
 
-  bcrypt.compare(password, userHashedPassword, function (err, result) {
+  bcrypt.compare(password, userHashedPassword, (err, result) => {
     if (err) {
       return res.status(500).send("Error: Internal server error.");
     }
