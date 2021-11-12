@@ -23,7 +23,22 @@ app.use(
 
 app.use(cookieParser());
 
-const urlDatabase = {};
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+    totalVisits: 0,
+    uniqueVisits: 0,
+    visitedBy: [],
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+    totalVisits: 0,
+    uniqueVisits: 0,
+    visitedBy: [],
+  },
+};
 
 const users = {};
 
@@ -49,13 +64,23 @@ app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
 
   if (urlDatabase[shortURL]) {
-    if (!req.cookies.visitor_id) {
+    const visitorID = req.cookies.visitor_id;
+
+    if (!visitorID) {
       //if the visitor has no cookie set it
       res.cookie("visitor_id", generateRandomString());
+    } else {
+      //if the visitor has a cookie
+      if (!urlDatabase[shortURL].visitedBy.includes(visitorID)) {
+        //if the user isnt included in the list of visitors
+        urlDatabase[shortURL].visitedBy.push(visitorID);
+        urlDatabase[shortURL].uniqueVisits++;
+      }
     }
 
-    //console.log(req.cookies.visitor_id);
+    urlDatabase[shortURL].totalVisits++;
 
+    console.log("url", urlDatabase[shortURL]);
     return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
   res.status(404).send("Error: Page not found");
@@ -113,10 +138,12 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
 
   const newURL = {
+    //about to make a constructor
     longURL,
     userID: cookieUserID,
     totalVisits: 0,
     uniqueVisits: 0,
+    visitedBy: [],
   };
 
   const key = generateRandomString();
