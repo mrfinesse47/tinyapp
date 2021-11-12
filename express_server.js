@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
+const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
 
 const PORT = 8080;
@@ -19,6 +20,8 @@ app.use(
     keys: ["key1", "key2"],
   })
 );
+
+app.use(cookieParser());
 
 const urlDatabase = {};
 
@@ -44,7 +47,15 @@ app.get("/", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
+
   if (urlDatabase[shortURL]) {
+    if (!req.cookies.visitor_id) {
+      //if the visitor has no cookie set it
+      res.cookie("visitor_id", generateRandomString());
+    }
+
+    //console.log(req.cookies.visitor_id);
+
     return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
   res.status(404).send("Error: Page not found");
@@ -101,7 +112,12 @@ app.post("/urls", (req, res) => {
 
   const longURL = req.body.longURL;
 
-  const newURL = { longURL, userID: cookieUserID };
+  const newURL = {
+    longURL,
+    userID: cookieUserID,
+    totalVisits: 0,
+    uniqueVisits: 0,
+  };
 
   const key = generateRandomString();
   urlDatabase[key] = newURL; //initilize new object within url database
