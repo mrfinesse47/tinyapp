@@ -38,15 +38,17 @@ const urlDatabase = {
     uniqueVisits: 0,
     visitedBy: [],
   },
-};
+}; //http://localhost:8080/u/i3BoGr
 
 const users = {};
 
 const helperClosure = require("./helpers");
-const { findUserIDbyEmail, getUserURLs, generateRandomString } = helperClosure(
-  urlDatabase,
-  users
-);
+const {
+  findUserIDbyEmail,
+  getUserURLs,
+  generateRandomString,
+  isUniqueVisitor,
+} = helperClosure(urlDatabase, users);
 
 //-------------------------------------------------------------------
 //  / route
@@ -69,13 +71,9 @@ app.get("/u/:shortURL", (req, res) => {
     if (!visitorID) {
       //if the visitor has no cookie set it
       res.cookie("visitor_id", generateRandomString());
-    } else {
-      //if the visitor has a cookie
-      if (!urlDatabase[shortURL].visitedBy.includes(visitorID)) {
-        //if the user isnt included in the list of visitors
-        urlDatabase[shortURL].visitedBy.push(visitorID);
-        urlDatabase[shortURL].uniqueVisits++;
-      }
+    } else if (!isUniqueVisitor(visitorID, shortURL)) {
+      urlDatabase[shortURL].visitedBy.push(visitorID);
+      urlDatabase[shortURL].uniqueVisits++;
     }
 
     urlDatabase[shortURL].totalVisits++;
