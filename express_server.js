@@ -62,7 +62,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[shortURL]) {
     return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
-  res.status(404).send("404 page not found");
+  res.status(404).send("Error: Page not found");
 });
 
 //-------------------------------------------------------------------
@@ -139,7 +139,11 @@ app.get("/urls/:shortURL", (req, res) => {
 
   if (!cookieUserID) {
     //if you have no cookie, redirect to log in
-    return res.redirect("/login");
+    return res
+      .status(400)
+      .send(
+        'Error: You must be logged in to edit short urls. <a href="/login">Login</a>'
+      );
   }
 
   if (!urlDatabase[shortURL]) {
@@ -149,13 +153,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
   const databaseUserID = urlDatabase[shortURL].userID;
 
-  console.log(urlDatabase);
-
   if (databaseUserID !== cookieUserID) {
     //guards against accessing someone elses' :shortURL will redirect back to "/urls"
     return res
       .status(403)
-      .send("Error: you cannot access others short URLs to edit");
+      .send(
+        'Error: you cannot access others short URLs to edit. Back to <a href="/urls">URLs</a>'
+      );
   }
 
   const templateVars = {
@@ -288,7 +292,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null; //deletes user cookies
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 //-------------------------------------------------------------------//
