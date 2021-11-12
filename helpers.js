@@ -22,12 +22,22 @@ const helperClosure = (urlDatabase, users) => {
     return userDB; //returns an object in the form of {shortURL:LongURL,....sortURL:LongURL}
   };
 
+  const isUniqueVisitor = (visitorID, shortURL) => {
+    if (urlDatabase[shortURL].visitedBy.includes(visitorID)) {
+      //checks the visitedByList on the shortURL object in the urlDatabase to see if it is listed in the array of visitors
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const generateRandomString = () => uuidv4().slice(0, 6);
 
   return {
     findUserIDbyEmail,
     getUserURLs,
     generateRandomString,
+    isUniqueVisitor,
   };
 };
 
