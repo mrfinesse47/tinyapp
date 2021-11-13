@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
+const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
 
 const PORT = 8080;
@@ -20,15 +21,18 @@ app.use(
   })
 );
 
-const urlDatabase = {};
+app.use(cookieParser());
 
+const urlDatabase = {};
 const users = {};
 
 const helperClosure = require("./helpers");
-const { findUserIDbyEmail, getUserURLs, generateRandomString } = helperClosure(
-  urlDatabase,
-  users
-);
+const {
+  findUserIDbyEmail,
+  getUserURLs,
+  generateRandomString,
+  isUniqueVisitor,
+} = helperClosure(urlDatabase, users);
 
 //-------------------------------------------------------------------
 //  / route
@@ -44,10 +48,28 @@ app.get("/", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
-  if (urlDatabase[shortURL]) {
-    return res.redirect(`${urlDatabase[shortURL].longURL}`);
+
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("Error: Page not found");
   }
-  res.status(404).send("Error: Page not found");
+
+  let visitorID = req.cookies.visitor_id;
+
+  if (!visitorID) {
+    //if the visitor has no cookie set it
+    visitorID = generateRandomString();
+    res.cookie("visitor_id", visitorID);
+  }
+
+  if (isUniqueVisitor(visitorID, shortURL)) {
+    urlDatabase[shortURL].uniqueVisits++;
+  }
+
+  const timeStamp = new Date().toLocaleString();
+  urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp }); //pushing a cookie ID and timestamp each short url visit
+  urlDatabase[shortURL].totalVisits++;
+
+  return res.redirect(`${urlDatabase[shortURL].longURL}`);
 });
 
 //-------------------------------------------------------------------
@@ -79,7 +101,7 @@ app.get("/urls", (req, res) => {
       );
   }
 
-  const userURLs = getUserURLs(userID); //returns an object in the form of {shortURL:LongURL,sortURL:LongURL......}
+  const userURLs = getUserURLs(userID);
 
   const templateVars = {
     urls: userURLs,
@@ -101,7 +123,14 @@ app.post("/urls", (req, res) => {
 
   const longURL = req.body.longURL;
 
-  const newURL = { longURL, userID: cookieUserID };
+  const newURL = {
+    //about to make a constructor
+    longURL,
+    userID: cookieUserID,
+    totalVisits: 0,
+    uniqueVisits: 0,
+    visitedBy: [],
+  };
 
   const key = generateRandomString();
   urlDatabase[key] = newURL; //initilize new object within url database
@@ -142,10 +171,15 @@ app.get("/urls/:shortURL", (req, res) => {
       );
   }
 
+  const userURLs = getUserURLs(databaseUserID);
+
   const templateVars = {
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
     user: users[cookieUserID],
+    totalVisits: userURLs[shortURL].totalVisits,
+    uniqueVisits: userURLs[shortURL].uniqueVisits,
+    visitors: userURLs[shortURL].visitedBy,
   };
   res.render("urls_show", templateVars);
 });

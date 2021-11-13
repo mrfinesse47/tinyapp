@@ -13,13 +13,31 @@ const helperClosure = (urlDatabase, users) => {
 
   const getUserURLs = (userID) => {
     //similar to the requested urlsForUser function
+    //gets all the urls per userID and other information related to the URLs like unique visits
     const userDB = {};
     for (const key in urlDatabase) {
       if (urlDatabase[key].userID === userID) {
-        userDB[key] = urlDatabase[key].longURL;
+        userDB[key] = {
+          longURL: urlDatabase[key].longURL,
+          totalVisits: urlDatabase[key].totalVisits,
+          uniqueVisits: urlDatabase[key].uniqueVisits,
+          visitedBy: urlDatabase[key].visitedBy,
+        };
       }
     }
-    return userDB; //returns an object in the form of {shortURL:LongURL,....sortURL:LongURL}
+    return userDB; //returns an URL database unique to the users ID
+  };
+
+  const isUniqueVisitor = (visitorID, shortURL) => {
+    console.log(urlDatabase[shortURL]);
+    const visitorList = urlDatabase[shortURL].visitedBy;
+
+    for (let i = 0; i < visitorList.length; i++) {
+      if (visitorList[i].visitorID === visitorID) {
+        return false;
+      }
+    }
+    return true;
   };
 
   const generateRandomString = () => uuidv4().slice(0, 6);
@@ -28,6 +46,7 @@ const helperClosure = (urlDatabase, users) => {
     findUserIDbyEmail,
     getUserURLs,
     generateRandomString,
+    isUniqueVisitor,
   };
 };
 
