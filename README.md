@@ -7,7 +7,7 @@ Super secure application, REST assured your data will be safe from attacks.
 
 ##### An overview of the users control panel:
 
-!["An overview of the users control panel"](https://github.com/mrfinesse47/tinyapp/blob/master/docs/the 4.png?raw=true)
+!["An overview of the users control panel"](https://github.com/mrfinesse47/tinyapp/blob/master/docs/4.png?raw=true)
 
 ##### You can update existing URLS:
 
