@@ -39,7 +39,12 @@ const {
 //-------------------------------------------------------------------
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  const userID = req.session.user_id;
+  if (userID) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 //-------------------------------------------------------------------
