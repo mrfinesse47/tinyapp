@@ -23,23 +23,7 @@ app.use(
 
 app.use(cookieParser());
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-    totalVisits: 0,
-    uniqueVisits: 0,
-    visitedBy: [],
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-    totalVisits: 0,
-    uniqueVisits: 0,
-    visitedBy: [],
-  },
-}; //http://localhost:8080/u/i3BoGr
-
+const urlDatabase = {};
 const users = {};
 
 const helperClosure = require("./helpers");
@@ -65,26 +49,27 @@ app.get("/", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
 
-  if (urlDatabase[shortURL]) {
-    let visitorID = req.cookies.visitor_id;
-
-    if (!visitorID) {
-      //if the visitor has no cookie set it
-      visitorID = generateRandomString();
-      res.cookie("visitor_id", visitorID);
-    }
-
-    if (isUniqueVisitor(visitorID, shortURL)) {
-      urlDatabase[shortURL].uniqueVisits++;
-    }
-
-    const timeStamp = new Date().toLocaleString();
-    urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp }); //pushing a cookie ID and timestamp each short url visit
-    urlDatabase[shortURL].totalVisits++;
-
-    return res.redirect(`${urlDatabase[shortURL].longURL}`);
+  if (!urlDatabase[shortURL]) {
+    res.status(404).send("Error: Page not found");
   }
-  res.status(404).send("Error: Page not found");
+
+  let visitorID = req.cookies.visitor_id;
+
+  if (!visitorID) {
+    //if the visitor has no cookie set it
+    visitorID = generateRandomString();
+    res.cookie("visitor_id", visitorID);
+  }
+
+  if (isUniqueVisitor(visitorID, shortURL)) {
+    urlDatabase[shortURL].uniqueVisits++;
+  }
+
+  const timeStamp = new Date().toLocaleString();
+  urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp }); //pushing a cookie ID and timestamp each short url visit
+  urlDatabase[shortURL].totalVisits++;
+
+  return res.redirect(`${urlDatabase[shortURL].longURL}`);
 });
 
 //-------------------------------------------------------------------
