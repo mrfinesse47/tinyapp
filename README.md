@@ -23,6 +23,7 @@ Super secure application, REST assured your data will be safe from attacks.
 - bcrypt
 - body-parser
 - cookie-session
+- cookie-parser
 - uuid
 - method-override
 
