@@ -11,7 +11,7 @@ Super secure application, REST assured your data will be safe from attacks.
 !["An overview of the users control panel"](https://github.com/mrfinesse47/tinyapp/blob/master/docs/4.png?raw=true)
 
 ##### You can update existing URLS:
-##### The edit page now tracks all visitors to the short URL, by their visitor cookie ID, and time visited short URL.
+##### The edit page now tracks all visitors to the short URL, by their visitor cookie ID, and visit Date.
 
 !["You can update existing URLS"](https://github.com/mrfinesse47/tinyapp/blob/master/docs/3.png?raw=true)
 
