@@ -72,13 +72,14 @@ app.get("/u/:shortURL", (req, res) => {
       //if the visitor has no cookie set it
       res.cookie("visitor_id", generateRandomString());
     } else if (!isUniqueVisitor(visitorID, shortURL)) {
-      urlDatabase[shortURL].visitedBy.push(visitorID);
+      const timeStamp = new Date().toLocaleString();
+      urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp });
       urlDatabase[shortURL].uniqueVisits++;
     }
 
     urlDatabase[shortURL].totalVisits++;
 
-    console.log("url", urlDatabase[shortURL]);
+    //console.log("url", urlDatabase[shortURL]);
     return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
   res.status(404).send("Error: Page not found");
@@ -102,6 +103,7 @@ app.get("/urls/new", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls", (req, res) => {
+  // console.log(urlDatabase);
   const userID = req.session.user_id;
 
   if (!userID || !users[userID]) {
@@ -113,7 +115,7 @@ app.get("/urls", (req, res) => {
       );
   }
 
-  const userURLs = getUserURLs(userID); //returns an object in the form of {shortURL:LongURL,sortURL:LongURL......}
+  const userURLs = getUserURLs(userID);
 
   const templateVars = {
     urls: userURLs,
@@ -183,10 +185,17 @@ app.get("/urls/:shortURL", (req, res) => {
       );
   }
 
+  const userURLs = getUserURLs(databaseUserID);
+
+  console.log(userURLs);
+
   const templateVars = {
     shortURL: shortURL,
     longURL: urlDatabase[shortURL].longURL,
     user: users[cookieUserID],
+    totalVisits: userURLs[shortURL].totalVisits,
+    uniqueVisits: userURLs[shortURL].uniqueVisits,
+    visitors: userURLs[shortURL].visitedBy,
   };
   res.render("urls_show", templateVars);
 });

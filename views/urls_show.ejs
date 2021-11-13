@@ -18,7 +18,8 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">
-          Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
+          Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %>,</a> Unique
+          Visits: <%= uniqueVisits %>, Total Visits: <%= totalVisits %>
         </p>
       </div>
       <div class="card-footer text-muted">
@@ -45,6 +46,25 @@
           </form>
         </div>
       </div>
+      <%if(visitors.length>0){%>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Visitor ID</th>
+            <th scope="col">Visit Date (UTC)</th>
+          </tr>
+        </thead>
+
+        <% visitors.forEach(visitor=>{%>
+        <tr>
+          <td><%=visitor.visitorID%></td>
+          <td><%=visitor.timeStamp%></td>
+        </tr>
+        <% })%>
+
+        <tbody></tbody>
+      </table>
+      <% }%>
     </div>
     <!-- Bootstrap JS -->
     <script

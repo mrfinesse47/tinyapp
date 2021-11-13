@@ -20,6 +20,7 @@ const helperClosure = (urlDatabase, users) => {
           longURL: urlDatabase[key].longURL,
           totalVisits: urlDatabase[key].totalVisits,
           uniqueVisits: urlDatabase[key].uniqueVisits,
+          visitedBy: urlDatabase[key].visitedBy,
         };
       }
     }
