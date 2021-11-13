@@ -47,23 +47,25 @@
         </div>
       </div>
       <%if(visitors.length>0){%>
-      <table class="table">
-        <thead>
+      <div class="container col-8">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Visitor ID</th>
+              <th scope="col">Visit Date (UTC)</th>
+            </tr>
+          </thead>
+
+          <% visitors.forEach(visitor=>{%>
           <tr>
-            <th scope="col">Visitor ID</th>
-            <th scope="col">Visit Date (UTC)</th>
+            <td><%=visitor.visitorID%></td>
+            <td><%=visitor.timeStamp%></td>
           </tr>
-        </thead>
+          <% })%>
 
-        <% visitors.forEach(visitor=>{%>
-        <tr>
-          <td><%=visitor.visitorID%></td>
-          <td><%=visitor.timeStamp%></td>
-        </tr>
-        <% })%>
-
-        <tbody></tbody>
-      </table>
+          <tbody></tbody>
+        </table>
+      </div>
       <% }%>
     </div>
     <!-- Bootstrap JS -->

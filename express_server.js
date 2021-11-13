@@ -66,20 +66,22 @@ app.get("/u/:shortURL", (req, res) => {
   const { shortURL } = req.params;
 
   if (urlDatabase[shortURL]) {
-    const visitorID = req.cookies.visitor_id;
+    let visitorID = req.cookies.visitor_id;
 
     if (!visitorID) {
       //if the visitor has no cookie set it
-      res.cookie("visitor_id", generateRandomString());
-    } else if (!isUniqueVisitor(visitorID, shortURL)) {
-      const timeStamp = new Date().toLocaleString();
-      urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp });
+      visitorID = generateRandomString();
+      res.cookie("visitor_id", visitorID);
+    }
+
+    if (isUniqueVisitor(visitorID, shortURL)) {
       urlDatabase[shortURL].uniqueVisits++;
     }
 
+    const timeStamp = new Date().toLocaleString();
+    urlDatabase[shortURL].visitedBy.push({ visitorID, timeStamp }); //pushing a cookie ID and timestamp each short url visit
     urlDatabase[shortURL].totalVisits++;
 
-    //console.log("url", urlDatabase[shortURL]);
     return res.redirect(`${urlDatabase[shortURL].longURL}`);
   }
   res.status(404).send("Error: Page not found");
@@ -103,7 +105,6 @@ app.get("/urls/new", (req, res) => {
 //-------------------------------------------------------------------
 
 app.get("/urls", (req, res) => {
-  // console.log(urlDatabase);
   const userID = req.session.user_id;
 
   if (!userID || !users[userID]) {
@@ -186,8 +187,6 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   const userURLs = getUserURLs(databaseUserID);
-
-  console.log(userURLs);
 
   const templateVars = {
     shortURL: shortURL,

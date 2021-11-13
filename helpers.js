@@ -13,6 +13,7 @@ const helperClosure = (urlDatabase, users) => {
 
   const getUserURLs = (userID) => {
     //similar to the requested urlsForUser function
+    //gets all the urls per userID and other information related to the URLs like unique visits
     const userDB = {};
     for (const key in urlDatabase) {
       if (urlDatabase[key].userID === userID) {
@@ -24,16 +25,19 @@ const helperClosure = (urlDatabase, users) => {
         };
       }
     }
-    return userDB; //returns an object in the form of {shortURL:LongURL,....sortURL:LongURL}
+    return userDB; //returns an URL database unique to the users ID
   };
 
   const isUniqueVisitor = (visitorID, shortURL) => {
-    if (urlDatabase[shortURL].visitedBy.includes(visitorID)) {
-      //checks the visitedByList on the shortURL object in the urlDatabase to see if it is listed in the array of visitors
-      return true;
-    } else {
-      return false;
+    console.log(urlDatabase[shortURL]);
+    const visitorList = urlDatabase[shortURL].visitedBy;
+
+    for (let i = 0; i < visitorList.length; i++) {
+      if (visitorList[i].visitorID === visitorID) {
+        return false;
+      }
     }
+    return true;
   };
 
   const generateRandomString = () => uuidv4().slice(0, 6);
