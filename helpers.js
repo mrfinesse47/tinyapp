@@ -16,7 +16,11 @@ const helperClosure = (urlDatabase, users) => {
     const userDB = {};
     for (const key in urlDatabase) {
       if (urlDatabase[key].userID === userID) {
-        userDB[key] = urlDatabase[key].longURL;
+        userDB[key] = {
+          longURL: urlDatabase[key].longURL,
+          totalVisits: urlDatabase[key].totalVisits,
+          uniqueVisits: urlDatabase[key].uniqueVisits,
+        };
       }
     }
     return userDB; //returns an object in the form of {shortURL:LongURL,....sortURL:LongURL}
