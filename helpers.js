@@ -29,7 +29,6 @@ const helperClosure = (urlDatabase, users) => {
   };
 
   const isUniqueVisitor = (visitorID, shortURL) => {
-    console.log(urlDatabase[shortURL]);
     const visitorList = urlDatabase[shortURL].visitedBy;
 
     for (let i = 0; i < visitorList.length; i++) {
